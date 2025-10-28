@@ -36,54 +36,86 @@ namespace Bazar.Repositorio.Repositorios
 
         }
 
-        public async Task<VentaResumenDTO?> SelecResumenVentas(string cod)
+        //public async Task<VentaResumenDTO?> SelecResumenVentas(string cod)
+        //{
+        //    var entidad = await context.Ventas
+        //                            .Where(x => x.CodVenta == cod)
+        //                            .Select(v => new VentaResumenDTO
+        //                            {
+        //                                Id = v.Id,
+        //                                CodVenta = v.CodVenta!,
+        //                                FechaVenta = v.FechaVenta,
+        //                                MontoTotal = v.MontoTotal,
+        //                                DniUsuario = v.Usuario!.DniUsuario,
+
+        //                                ArticulosVendidos = context.Set<VentaArticulo>().Where(va => va.VentaId == v.Id)
+        //                                .Select(va => new ArticuloListadoDTO
+        //                                {
+        //                                    Id = va.Articulo!.Id,
+        //                                    Articulo = va.Articulo!.DescripcionArticulo,
+        //                                    Cantidad = va.CantidadArt,
+        //                                    Precio = va.PrecioUnitarioArt
+        //                                }).ToList()
+        //                            })
+        //                            .FirstOrDefaultAsync();
+        //    return entidad;
+        //}
+
+        //public async Task<VentaResumenDTO?> SelecVentasDelDia(DateTime dia)
+        //{
+        //    var entidad = await context.Ventas
+        //                            .Where(x => x.FechaVenta == dia)
+        //                            .Select(v => new VentaResumenDTO
+        //                            {
+        //                                Id = v.Id,
+        //                                CodVenta = v.CodVenta!,
+        //                                FechaVenta = v.FechaVenta,
+        //                                MontoTotal = v.MontoTotal,
+        //                                DniUsuario = v.Usuario!.DniUsuario,
+
+        //                                ArticulosVendidos = context.Set<VentaArticulo>().Where(va => va.VentaId == v.Id)
+        //                                .Select(va => new ArticuloListadoDTO
+        //                                {
+        //                                    Id = va.Articulo!.Id,
+        //                                    Articulo = va.Articulo!.DescripcionArticulo,
+        //                                    Cantidad = va.CantidadArt,
+        //                                    Precio = va.PrecioUnitarioArt
+        //                                }).ToList()
+        //                            })
+        //                            .FirstOrDefaultAsync();
+        //    return entidad;
+        //}
+
+        public async Task<VentaResumenDTO?> SelecResumenVentasDia(DateTime fecha)
         {
-            var entidad = await context.Ventas
-                                    .Where(x => x.CodVenta == cod)
-                                    .Select(v => new VentaResumenDTO
-                                    {
-                                        Id = v.Id,
-                                        CodVenta = v.CodVenta!,
-                                        FechaVenta = v.FechaVenta,
-                                        MontoTotal = v.MontoTotal,
-                                        DniUsuario = v.Usuario!.DniUsuario,
+            var ventas = await context.VentasArticulos
+                .Where(v => v.Venta!.FechaVenta.Date == fecha.Date)
+                .Select(v => new
+                {
+                    v.Articulo!.DescripcionArticulo,
+                    v.CantidadArt,
+                    v.PrecioUnitarioArt,
+                    Subtotal = v.CantidadArt * v.PrecioUnitarioArt
+                })
+                .ToListAsync();
 
-                                        ArticulosVendidos = context.Set<VentaArticulo>().Where(va => va.VentaId == v.Id)
-                                        .Select(va => new ArticuloListadoDTO
-                                        {
-                                            Id = va.Articulo!.Id,
-                                            Articulo = va.Articulo!.DescripcionArticulo,
-                                            Cantidad = va.CantidadArt,
-                                            Precio = va.PrecioUnitarioArt
-                                        }).ToList()
-                                    })
-                                    .FirstOrDefaultAsync();
-            return entidad;
-        }
+            if (ventas == null || ventas.Count == 0)
+                return null;
 
-        public async Task<VentaResumenDTO?> SelecVentasDelDia(DateTime dia)
-        {
-            var entidad = await context.Ventas
-                                    .Where(x => x.FechaVenta == dia)
-                                    .Select(v => new VentaResumenDTO
-                                    {
-                                        Id = v.Id,
-                                        CodVenta = v.CodVenta!,
-                                        FechaVenta = v.FechaVenta,
-                                        MontoTotal = v.MontoTotal,
-                                        DniUsuario = v.Usuario!.DniUsuario,
+            var lineas = ventas
+                .Select(v =>
+                    $"Artículo: {v.DescripcionArticulo} | Cantidad: {v.CantidadArt} | " +
+                    $"Precio Unitario: {v.PrecioUnitarioArt:C} | Subtotal: {v.Subtotal:C}")
+                .ToList();
 
-                                        ArticulosVendidos = context.Set<VentaArticulo>().Where(va => va.VentaId == v.Id)
-                                        .Select(va => new ArticuloListadoDTO
-                                        {
-                                            Id = va.Articulo!.Id,
-                                            Articulo = va.Articulo!.DescripcionArticulo,
-                                            Cantidad = va.CantidadArt,
-                                            Precio = va.PrecioUnitarioArt
-                                        }).ToList()
-                                    })
-                                    .FirstOrDefaultAsync();
-            return entidad;
+            var totalDia = ventas.Sum(v => v.Subtotal);
+
+            return new VentaResumenDTO
+            {
+                Fecha = fecha.Date,
+                LineasResumen = lineas,
+                TotalDia = totalDia
+            };
         }
     }
 }

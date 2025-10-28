@@ -42,29 +42,29 @@ namespace Bazar.Server.Controllers
             return Ok(lista);
         }
 
-        [HttpGet("resumenventa")] //api/resumenventa
+        //[HttpGet("resumenventa")] //api/resumenventa
 
-        public async Task<ActionResult<VentaResumenDTO>> ResumenVenta(string cod)
-        {
-            var entidad = await repositorio.SelecResumenVentas(cod);
-            //var articulos = await context.Articulos.ToListAsync();
-            if (entidad == null)
-            {
-                return NotFound($"No existe la venta con el Código: {cod}.");
-            }
+        //public async Task<ActionResult<VentaResumenDTO>> ResumenVenta(string cod)
+        //{
+        //    var entidad = await repositorio.SelecResumenVentas(cod);
+        //    //var articulos = await context.Articulos.ToListAsync();
+        //    if (entidad == null)
+        //    {
+        //        return NotFound($"No existe la venta con el Código: {cod}.");
+        //    }
 
-            return Ok(entidad);
-        }
+        //    return Ok(entidad);
+        //}
 
-        [HttpGet("ventadeldia")] //api/ventadeldia
+        [HttpGet("ventas-del-dia")] //api/venta/ventas-del-dia
 
         public async Task<ActionResult<VentaResumenDTO>> VentaDelDia(DateTime dia)
         {
-            var entidad = await repositorio.SelecVentasDelDia(dia);
+            var entidad = await repositorio.SelecResumenVentasDia(dia);
             //var articulos = await context.Articulos.ToListAsync();
             if (entidad == null)
             {
-                return NotFound($"No existen ventas en el día: {dia}.");
+                return NotFound($"No existen ventas registradas el día {dia:dd/MM/yyyy}.");
             }
 
             return Ok(entidad);

@@ -17,5 +17,8 @@ namespace Bazar.shared.DTO
         public int CantidadArt { get; set; }
         public decimal PrecioUnitarioArt { get; set; }
         public decimal SubtotalArt { get; set; }
+
+
+
     }
 }

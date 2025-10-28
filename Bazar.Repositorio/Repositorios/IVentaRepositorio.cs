@@ -5,8 +5,9 @@ namespace Bazar.Repositorio.Repositorios
 {
     public interface IVentaRepositorio : IRepositorio<Venta>
     {
-        Task<VentaResumenDTO?> SelecResumenVentas(string cod);
+       // Task<VentaResumenDTO?> SelecResumenVentas(string cod);
+        
         Task<Venta?> SelectByVentaCod(string cod);
-        Task<VentaResumenDTO?> SelecVentasDelDia(DateTime dia);
+        Task<VentaResumenDTO?> SelecResumenVentasDia(DateTime dia);
     }
 }

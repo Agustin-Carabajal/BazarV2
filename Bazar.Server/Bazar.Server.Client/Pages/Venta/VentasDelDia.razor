@@ -1,0 +1,104 @@
+﻿@page "/ventas-del-dia"
+
+@inject IHttpServicio http
+
+<h3>Ventas Del Día</h3>
+<br />
+
+<div class="mb-3">
+    <label for="fechaVenta" class="form-label"><b>Seleccione una fecha:</b></label>
+    <InputDate @bind-Value="fechaSeleccionada" class="form-control" id="fechaVenta" />
+</div>
+
+<button class="btn btn-primary" @onclick="LeerVentas">Buscar Ventas</button>
+
+<br /><br />
+
+@if (cargando)
+{
+    <p>Buscando ventas...</p>
+}
+else if (ventaDelDia != null)
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Total del Día</th>
+                <th>Detalle</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@ventaDelDia.Fecha.ToShortDateString()</td>
+                <td>@ventaDelDia.TotalDia.ToString("C")</td>
+                <td>
+                    <ul>
+                        @foreach (var linea in ventaDelDia.LineasResumen)
+                        {
+                            <li>@linea</li>
+                        }
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+else if (!string.IsNullOrEmpty(mensaje))
+{
+    <p class="text-danger">@mensaje</p>
+}
+
+<Confirmacion @ref="confirmacion"
+              Titulo="Información"
+              textOk="Aceptar"
+              textCancelar="Cancelar"
+              onCancel="CancelarAccion"
+              onConfirm="ConfirmarAccion">
+    <p>Ventas realizadas en: @fechaSeleccionada.ToShortDateString()</p>
+</Confirmacion>
+
+@code {
+    VentaResumenDTO? ventaDelDia;
+    string mensaje = string.Empty;
+    bool cargando = false;
+    DateTime fechaSeleccionada = DateTime.Today;
+    Confirmacion? confirmacion;
+
+    private async Task LeerVentas()
+    {
+        cargando = true;
+        ventaDelDia = null;
+        mensaje = string.Empty;
+        confirmacion?.Ver();
+
+        try
+        {
+            var resp = await http.Get<VentaResumenDTO>($"api/Venta/ventas-del-dia?dia={fechaSeleccionada:yyyy-MM-dd}");
+
+            if (!resp.Error)
+            {
+                ventaDelDia = resp.Respuesta;
+            }
+            else
+            {
+                mensaje = resp.ObtenerError();
+            }
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"Error al cargar ventas: {ex.Message}";
+        }
+
+        cargando = false;
+        
+    }
+
+    private void ConfirmarAccion()
+    {
+        
+        confirmacion?.Ocultar();
+    }
+    private void CancelarAccion() => confirmacion?.Ocultar();
+}
+

@@ -3,6 +3,7 @@ using Bazar.BD.Datos.Entity;
 using Bazar.Repositorio.Repositorios;
 using Bazar.Server.Client.Pages;
 using Bazar.Server.Components;
+using Bazar.Servicio.ServiciosHttp;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +30,23 @@ builder.Services.AddScoped<IVentaArticuloRepositorio, VentaArticuloRepositorio>(
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddServerSideBlazor()
+    .AddCircuitOptions(options => { options.DetailedErrors = true; });
+
+
+
+builder.Services.AddHttpClient("API", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7028/");
+});
+builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("API"));
+
+builder.Services.AddScoped<IHttpServicio, HttpServicio>();
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri("https://localhost:7028/")
+});
 
 #endregion
 
